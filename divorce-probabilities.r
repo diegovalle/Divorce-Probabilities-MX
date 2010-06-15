@@ -60,6 +60,10 @@ ggplot(mdf, aes(years, value, group = variable, color = variable)) +
   theme_bw()
 dev.print(png, file="output/Marriages and Divorces per 1000 Adults, 2001,2005-2007.png", width=640, height=480)
 
+
+
+
+##################################################
 #This is the interesting part. What are cumulative probabilities that
 #a marriage ends in divorce after a given number of years
 divp <- read.csv("data/divorce-probs.csv", header = T)
@@ -89,6 +93,32 @@ mdivp$variable <- rep(0:14, each = 15)
 lm_df <- function(df) {
   lm(value ~ variable, data = df)
 }
+
+library(nlme)
+mdivp2 <- na.omit(mdivp)
+new <- mdivp[is.na(mdivp$value),]
+new
+
+mdivp2 <- subset(mdivp2, variable != 0)
+mdivp2 <- mdivp2[order(mdivp2$Year.of.Marriage),]
+reg <- lmer(value ~ variable * Year.of.Marriage + (1 | Year.of.Marriage), data = mdivp2)
+reg <- lme(fixed = value ~ variable * Year.of.Marriage,
+            random = ~ 1 | Year.of.Marriage,
+            data = mdivp2)
+reg
+mdivp2$pre <- predict(reg)
+pre <- data.frame(predict(reg, new))
+new$pre <- unlist(pre)
+
+ggplot(mdivp, aes(variable, value, group = Year.of.Marriage)) +
+    geom_line() +
+    geom_line(data = new, aes(variable, pre,
+              group = Year.of.Marriage),
+              linetype = 2)
+
+
+
+
 dmodels <- dlply(subset(mdivp, variable > 0 & Year.of.Marriage < 2007),
                  .(Year.of.Marriage), lm_df)
 dcoefs <- ldply(dmodels, function(x) c(coef(x)))

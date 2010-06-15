@@ -1,14 +1,10 @@
 The probability of a marriage ending in divorce in Mexico
 =========================================================
-This program calculates the probability that a marriage in Mexico ends in divorce based on data obtained from the INEGI. Basically reproduce some of the charts in [Marriage and Divorce: Changes and their Driving Forces][1] by Betsey Stevenson and Justin Wolfers with data from Mexico, with some projections added in.
+This program calculates the probability that a marriage in Mexico ends in divorce based on data obtained from the INEGI. Basically reproduce some of the charts in [Marriage and Divorce: Changes and their Driving Forces][1] [PDF] by Betsey Stevenson and Justin Wolfers with data from Mexico, with some projections added in.
 
 Requirements
 ------------
 * R
-
-To run
--------
-Be sure to change the working directory to whatever it is in your machine
 
 Data
 -----
