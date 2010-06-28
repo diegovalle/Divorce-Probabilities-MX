@@ -9,7 +9,7 @@
 library(ggplot2)
 library(Hmisc)
 library(directlabels)
-
+library(nlme)
 
 #Marriage rate and divorce rate per 1000
 div <- read.csv("data/marriage-rate.csv", header=T)
@@ -90,49 +90,58 @@ divp <- read.csv("data/divorce-probs.csv", header = T)
 names(divp)[1] <- "Year.of.Marriage"
 mdivp <- melt(divp, id = c("Year.of.Marriage"))
 mdivp$variable <- rep(0:14, each = 15)
-lm_df <- function(df) {
-  lm(value ~ variable, data = df)
-}
 
-library(nlme)
+########################################################
+#Multilevel Model
+########################################################
 mdivp2 <- na.omit(mdivp)
 new <- mdivp[is.na(mdivp$value),]
-new
 
 mdivp2 <- subset(mdivp2, variable != 0)
 mdivp2 <- mdivp2[order(mdivp2$Year.of.Marriage),]
-reg <- lmer(value ~ variable * Year.of.Marriage + (1 | Year.of.Marriage), data = mdivp2)
 reg <- lme(fixed = value ~ variable * Year.of.Marriage,
             random = ~ 1 | Year.of.Marriage,
             data = mdivp2)
-reg
+
 mdivp2$pre <- predict(reg)
 pre <- data.frame(predict(reg, new))
-new$pre <- unlist(pre)
-
+new$value <- unlist(pre)
+new <- rbind(subset(mdivp, value > 0), new)
+#
 ggplot(mdivp, aes(variable, value, group = Year.of.Marriage)) +
-    geom_line() +
-    geom_line(data = new, aes(variable, pre,
+    geom_line(data = new, aes(variable, value,
               group = Year.of.Marriage),
-              linetype = 2)
+              linetype = 2) +
+    geom_line()
+dev.print(png, file="output/Multilevel-Marriages Ending in Divorce, by Year of Marriage.png", width=800, height=600)
 
 
 
-
+########################################################
+#Plain old regression
+########################################################
+lm_df <- function(df) {
+  lm(value ~ variable, data = df)
+}
+mdivp <- melt(divp, id = c("Year.of.Marriage"))
+mdivp$variable <- rep(0:14, each = 15)
 dmodels <- dlply(subset(mdivp, variable > 0 & Year.of.Marriage < 2007),
                  .(Year.of.Marriage), lm_df)
 dcoefs <- ldply(dmodels, function(x) c(coef(x)))
 names(dcoefs)[2:3] <- c("intercept", "slope")
 p <- subset(mdivp, is.na(value))
 p <- merge(p, dcoefs, by = "Year.of.Marriage")
-p$value <- p$intercept + p$variable*p$slope
+p$value <- p$intercept + p$variable * p$slope
 p <- with(p, data.frame(Year.of.Marriage, variable, value))
-mdivp <- rbind(subset(mdivp, value > 0), p)
-ggplot(subset(mdivp, Year.of.Marriage<2004), aes(x = variable, y = value,
-              group = Year.of.Marriage, lineshape = Year.of.Marriage,
-              color = factor(Year.of.Marriage))) +
-       geom_line()+
-       theme_bw() +
+p <- rbind(subset(mdivp, value > 0), p)
+ggplot(data = p, aes(variable, value,
+                               group = Year.of.Marriage,
+                               color = factor(Year.of.Marriage))) +
+       geom_line(linetype = 2)+
+       geom_line(data = subset(mdivp, Year.of.Marriage < 2004),
+                 aes(x = variable, y = value,
+                     group = Year.of.Marriage,
+                     color = factor(Year.of.Marriage))) +
        scale_y_continuous(formatter = "percent") +
        xlab("Years since wedding") +
        ylab("Proportion of marriages ending in divorce") +
@@ -142,9 +151,23 @@ ggplot(subset(mdivp, Year.of.Marriage<2004), aes(x = variable, y = value,
          #            vjust = .2, size = 3, color = "black")+
        opts(legend.position="none",
             title = "Projection of Divorce Probabilities" )
-direct.label(last_plot(), "last.smart")
+direct.label(last_plot(), "last.points")
 dev.print(png, file="output/Projection-Marriages Ending in Divorce, by Year of Marriage.png", width=800, height=600)
-write.csv(cast(mdivp),"output/divorce-probability.csv")
+
+
+
+probs <- cast(p)
+pred <- apply(probs[2:ncol(probs)], 2,
+              function(x) coef(lm(x ~ probs$Year.of.Marriage)))
+years <- 2006:2010
+pred08.10 <-
+    data.frame(apply(pred, 2, function(x) x[1] + years * x[2]))
+names(pred08.10) <- names(probs)[2:ncol(probs)]
+pred08.10$Year.of.Marriage <- years
+allprobs <- rbind(probs[1:(nrow(probs) - 2),], pred08.10)
+allprobs[14:15,2] <- probs[14:15,2]
+allprobs[14,3] <- probs[14,3]
+write.csv(allprobs,"output/divorce-probability.csv")
 
 #is there indeed a 7 year itch
 #calculate probabilities by year (not cumulative)
@@ -187,5 +210,5 @@ dev.print(png, file = "output/Marriage Length.png", width = 600, height = 400)
 
 # a density function of marriages that ended in divorce
 ggplot(data = mdivp, aes(x = duration, weight = value/sum(value),
-                         group = variable)) +
+                         group = variable, color = variable)) +
        geom_density()
