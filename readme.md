@@ -1,6 +1,6 @@
 The probability of a marriage ending in divorce in Mexico
 =========================================================
-This program calculates the probability that a marriage in Mexico ends in divorce based on data obtained from the INEGI. Basically reproduce some of the charts in [Marriage and Divorce: Changes and their Driving Forces][1] [PDF] by Betsey Stevenson and Justin Wolfers with data from Mexico, with some projections added in.
+This program calculates the probability that a marriage in Mexico ends in divorce based on data obtained from the INEGI. Basically reproduce some of the charts in [Marriage and Divorce: Changes and their Driving Forces][1] [PDF] by Betsey Stevenson and Justin Wolfers with data from Mexico, with some projections added in and an attempt to ascertain whether there is a 7 year itch (more like 5 year itch).
 
 Requirements
 ------------
@@ -28,6 +28,6 @@ Output
 
 Author
 -----
-[Diego Valle] (www.diegovalle.net)
+[Diego Valle-Jones](www.diegovalle.net)
 
 [1]: http://bpp.wharton.upenn.edu/jwolfers/Papers/MarriageandDivorce(JEP).pdf
