@@ -24,7 +24,8 @@ ggplot(mrates, aes(x = 1993:2007, y = value, group=variable, color=variable)) +
                    breaks=c("mar.rate", "div.rate")) +
   opts(title="Marriages and Divorces per Thousand People, Mexico 1993-2007") +
   xlab("Year")+ylab("Rate")    +
-  theme_bw()
+  theme_bw() +
+  scale_y_continuous(breaks = c(.4,.55,.7,6,6.5,7,7.5))
 dev.print(png, file="output/Marriages and Divorces per Thousand People, Mexico 1993-2007.png", width=640, height=480)
 
 #According to Helping Couples Change
@@ -53,11 +54,13 @@ years <- c(2001,2005:2007)
 mdf <- melt(data.frame(years,marriages,divorces),id="years")
 ggplot(mdf, aes(years, value, group = variable, color = variable)) +
   geom_line() +
+  geom_point() +
   xlab("Year") +
   opts(title="Marriages and Divorces per Thousand Adults (2001 and 2005-2007)") +
   ylab("Rate") +
   facet_grid(variable ~ .,scales = "free", space = "free")   +
-  theme_bw()
+  theme_bw() +
+  scale_y_continuous(breaks = c(.85, 1, 8.5, 9, 9.5))
 dev.print(png, file="output/Marriages and Divorces per 1000 Adults, 2001,2005-2007.png", width=640, height=480)
 
 
@@ -134,7 +137,7 @@ p <- merge(p, dcoefs, by = "Year.of.Marriage")
 p$value <- p$intercept + p$variable * p$slope
 p <- with(p, data.frame(Year.of.Marriage, variable, value))
 p <- rbind(subset(mdivp, value > 0), p)
-ggplot(data = p, aes(variable, value,
+ggplot(subset(p, Year.of.Marriage < 2007) , aes(variable, value,
                                group = Year.of.Marriage,
                                color = factor(Year.of.Marriage))) +
        geom_line(linetype = 2)+
@@ -145,7 +148,8 @@ ggplot(data = p, aes(variable, value,
        scale_y_continuous(formatter = "percent") +
        xlab("Years since wedding") +
        ylab("Proportion of marriages ending in divorce") +
-       scale_colour_grey("Year", start = .9, end = 0) +
+       scale_colour_grey("Year", start = .8, end = 0) +
+       theme_bw() +
        #geom_text(data=mdivp[mdivp$variable == 14, ],
         #         aes(label = Year.of.Marriage), hjust = -.1,
          #            vjust = .2, size = 3, color = "black")+
@@ -186,7 +190,7 @@ itch <- ggplot(mdivp, aes(x = variable, y = value, group = Year.of.Marriage,
        ylab("Probability of a marriage ending in divorce during a given year") +
        opts(title = "All Marriages Ending in Divorce, by Year of Marriage")  +
        theme_bw() +
-       scale_colour_grey("Year", start = .9, end = 0)
+       scale_colour_grey("Year", start = .8, end = 0)
 last.points <- dl.indep(data.frame(d[which.max(d$x),],hjust=0,vjust=0.5))
 direct.label(itch, last.points)
 dev.print(png, file="output/Prob. Marriages Ending in Divorce, by Year of Marriage.png",
