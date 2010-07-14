@@ -8,10 +8,9 @@ Requirements
 
 Data
 -----
-* divorce-probs.xlsx: An Excel file with data on the number of marriages in a given year, the percentage that ended in divorce and some calculations to obtain the proportion of marriages that end in divorce
-* divorce-probs.csv: The csv version of the above file
-* marriage-rate.csv: Marriage rate per 1000 people 
-* marriages-length.csv: Data to find out after how many years of marriage is the probability of divorce highest (i.e. is there a 7 year itch?)
+* divorce-data.csv: An csv file with data on the number of divorces in a given year as downloaded from the INEGI
+* marriage-data.csv: An csv file with data on the number of marriages in a given year as downloaded from the INEGI
+* marriage-rate.csv: Marriage rate per 1000 people with population data from CONAPO
 
 Data Source: Website of the [INEGI](http://www.inegi.org.mx)
 
