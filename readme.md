@@ -5,6 +5,7 @@ This program calculates the probability that a marriage in Mexico ends in divorc
 Requirements
 ------------
 * R
+* Run "divorce-probabilities.r"
 
 Data
 -----
@@ -22,7 +23,7 @@ Output
 * A png chart with the proportion of marriages that end in divorce
 ![proportion of marriages that end in divorce](http://github.com/diegovalle/Divorce-Probabilities-MX/raw/master/output/Marriages%20Ending%20in%20Divorce,%20by%20Year%20of%20Marriage.png)
 * A png chart with projections of the proportion of marriages that end in divorce
-* A csv file (divorce-probability.csv) that contains the proportion of marriages that end in divorce after a number of years
+* A csv file (divorce-probability-lme.csv) that contains the proportion of marriages that end in divorce after a number of years
 * A png chart of the average length of marriages that ended in divorce
 
 Author
