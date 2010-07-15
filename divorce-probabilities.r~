@@ -11,7 +11,24 @@ library(Hmisc)
 library(directlabels)
 library(nlme)
 
+predictAll <- function(df, filename){
+    probs <- cast(df)
+    pred <- apply(probs[2:ncol(probs)], 2,
+                  function(x) coef(lm(x ~ probs$Year.of.Marriage)))
+    years <- 2006:2010
+    pred08.10 <-
+        data.frame(apply(pred, 2, function(x) x[1] + years * x[2]))
+    names(pred08.10) <- names(probs)[2:ncol(probs)]
+    pred08.10$Year.of.Marriage <- years
+    allprobs <- rbind(probs[1:(nrow(probs) - 2),], pred08.10)
+    allprobs[14:15,2] <- probs[14:15,2]
+    allprobs[14,3] <- probs[14,3]
+    write.csv(allprobs, filename)
+    NULL
+}
+
 source("load.r")
+
 
 #Marriage rate and divorce rate per 1000
 div <- read.csv("data/marriage-rate.csv", header=T)
@@ -74,6 +91,7 @@ dev.print(png, file="output/Marriages and Divorces per 1000 Adults, 2001,2005-20
 ##################################################
 #This is the interesting part. What are cumulative probabilities that
 #a marriage ends in divorce after a given number of years
+#################################################
 divp <- read.csv("output/divorce-probs.csv")
 names(divp)[1] <- "Year.of.Marriage"
 mdivp <- melt(divp[c(1,5,9,13), ], id = c("Year.of.Marriage"))
@@ -118,25 +136,23 @@ pre <- data.frame(predict(reg, new))
 new$value <- unlist(pre)
 new <- rbind(subset(mdivp, value > 0), new)
 #
-ggplot(mdivp, aes(variable, value, group = Year.of.Marriage)) +
-    geom_line(data = new, aes(variable, value,
-              group = Year.of.Marriage),
-              linetype = 2) +
-    geom_line()
+ggplot(new, aes(variable, value, group = Year.of.Marriage,
+                color = factor(Year.of.Marriage))) +
+       geom_line(data = mdivp, aes(variable, value,
+              group = Year.of.Marriage), linetype = 1) +
+       geom_line(linetype = 2) +
+       scale_y_continuous(formatter = "percent") +
+       xlab("Years since wedding") +
+       ylab("Proportion of marriages ending in divorce") +
+       scale_colour_grey("Year", start = .8, end = 0) +
+       theme_bw() +
+       opts(legend.position="none",
+            title = "Projection of Divorce Probabilities" )
+direct.label(last_plot(), "last.points")
 dev.print(png, file="output/Multilevel-Marriages Ending in Divorce, by Year of Marriage.png", width=800, height=600)
 
-probs <- cast(new)
-pred <- apply(probs[2:ncol(probs)], 2,
-              function(x) coef(lm(x ~ probs$Year.of.Marriage)))
-years <- 2006:2010
-pred08.10 <-
-    data.frame(apply(pred, 2, function(x) x[1] + years * x[2]))
-names(pred08.10) <- names(probs)[2:ncol(probs)]
-pred08.10$Year.of.Marriage <- years
-allprobs <- rbind(probs[1:(nrow(probs) - 2),], pred08.10)
-allprobs[14:15,2] <- probs[14:15,2]
-allprobs[14,3] <- probs[14,3]
-write.csv(allprobs,"output/divorce-probability-lme.csv")
+
+predictAll(new, "output/divorce-probability-lme.csv")
 
 
 ########################################################
@@ -156,7 +172,7 @@ p <- merge(p, dcoefs, by = "Year.of.Marriage")
 p$value <- p$intercept + p$variable * p$slope
 p <- with(p, data.frame(Year.of.Marriage, variable, value))
 p <- rbind(subset(mdivp, value > 0), p)
-ggplot(subset(p, Year.of.Marriage < 2007) , aes(variable, value,
+ggplot(subset(p, Year.of.Marriage < 2005), aes(variable, value,
                                group = Year.of.Marriage,
                                color = factor(Year.of.Marriage))) +
        geom_line(linetype = 2)+
@@ -178,19 +194,7 @@ direct.label(last_plot(), "last.points")
 dev.print(png, file="output/Projection-Marriages Ending in Divorce, by Year of Marriage.png", width=800, height=600)
 
 
-
-probs <- cast(p)
-pred <- apply(probs[2:ncol(probs)], 2,
-              function(x) coef(lm(x ~ probs$Year.of.Marriage)))
-years <- 2006:2010
-pred08.10 <-
-    data.frame(apply(pred, 2, function(x) x[1] + years * x[2]))
-names(pred08.10) <- names(probs)[2:ncol(probs)]
-pred08.10$Year.of.Marriage <- years
-allprobs <- rbind(probs[1:(nrow(probs) - 2),], pred08.10)
-allprobs[14:15,2] <- probs[14:15,2]
-allprobs[14,3] <- probs[14,3]
-write.csv(allprobs,"output/divorce-probability.csv")
+predictAll(p, "output/divorce-probability.csv")
 
 #is there indeed a 7 year itch
 #calculate probabilities by year (not cumulative)

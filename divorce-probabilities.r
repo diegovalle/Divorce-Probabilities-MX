@@ -233,7 +233,8 @@ qplot(1993:2007, means$V1, geom = "line")+
        xlab("Year") +
        ylab("Average lenght of marriages") +
        opts(title = "Average length of all marriages that ended in divorce in Mexico")  +
-       theme_bw()
+       theme_bw() +
+       scale_y_continuous(limits = c(0, 14))
 dev.print(png, file = "output/Marriage Length.png", width = 600, height = 400)
 
 # a density function of marriages that ended in divorce
