@@ -211,7 +211,7 @@ itch <- ggplot(mdivp, aes(x = variable, y = value,
        geom_line() +
        scale_y_continuous(formatter = "percent") +
        xlab("Years since wedding") +
-       ylab("Probability of a marriage ending in divorce during a given year") +
+       ylab("Proportion of a marriages ending in divorce each year") +
        opts(title = "All Marriages Ending in Divorce, by Year of Marriage")  +
        theme_bw() +
        scale_colour_grey("Year", start = .8, end = 0)
