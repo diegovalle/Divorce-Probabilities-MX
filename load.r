@@ -38,7 +38,6 @@ x <- data.frame(t(pyearly))
 x[is.na(x)] <- 0
 pcumsum <- data.frame(t(cumsum(x)))
 
-fix(cumsum)
 shiftCols <- function(df) {
     div.probs <- df
     div.probs[TRUE] <- NA

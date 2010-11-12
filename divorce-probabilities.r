@@ -11,6 +11,8 @@ library(Hmisc)
 library(directlabels)
 library(nlme)
 
+source("load.r")
+
 predictAll <- function(df, filename){
     probs <- cast(df)
     pred <- apply(probs[2:ncol(probs)], 2,
@@ -27,7 +29,6 @@ predictAll <- function(df, filename){
     NULL
 }
 
-source("load.r")
 
 
 #Marriage rate and divorce rate per 1000
